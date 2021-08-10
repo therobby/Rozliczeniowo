@@ -22,7 +22,7 @@ class User extends Authenticatable
         'password',
     ];
 
-    /**
+    /** 
      * The attributes that should be hidden for arrays.
      *
      * @var array

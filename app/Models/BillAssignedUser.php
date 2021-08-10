@@ -9,3 +9,4 @@ class BillAssignedUser extends Model
 {
     use HasFactory;
 }
+ 

@@ -9,3 +9,4 @@ class Bill extends Model
 {
     use HasFactory;
 }
+ 

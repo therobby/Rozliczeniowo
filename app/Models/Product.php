@@ -9,3 +9,4 @@ class Product extends Model
 {
     use HasFactory;
 }
+ 

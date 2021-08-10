@@ -26,4 +26,4 @@ Route::middleware('auth:api')->get('/bill/{id}', [BillController::class, 'show']
 Route::middleware('auth:api')->patch('/bill/{id}', [BillController::class, 'update']);
 Route::middleware('auth:api')->delete('/bill/{id}', [BillController::class, 'destroy']);
 
-
+ 

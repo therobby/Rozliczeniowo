@@ -31,3 +31,4 @@ class CreateBillAssignedProductsTable extends Migration
         Schema::dropIfExists('bill_assigned_products');
     }
 }
+ 
