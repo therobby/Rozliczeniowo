@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBillsTable extends Migration
+class CreateBillsGroupsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,11 @@ class CreateBillsTable extends Migration
      */
     public function up()
     {
-        Schema::create('bills', function (Blueprint $table) {
+        Schema::create('bills_groups', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('owner_id');
             $table->text('title');
             $table->text('description');
-            $table->boolean('fixed_price');
-            $table->string('currency', 6)->default('PLN');
-            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
     }
@@ -32,7 +29,6 @@ class CreateBillsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bills');
+        Schema::dropIfExists('bills_groups');
     }
 }
- 
