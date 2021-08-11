@@ -18,8 +18,6 @@ class BillController extends Controller
         return response(401);
     }
 
-    // 730 kalafior 
-
     // save new bill
     public function store(Request $request){
         if(auth()->check()){
@@ -34,6 +32,7 @@ class BillController extends Controller
 
             $bill = new Bill;
             $bill->title = $request->input('title');
+            $bill->owner_id = $user_id;
             $bill->description = $request->input('description');
             $bill->fixed_price = $request->input('fixed_price');
             $bill->currency = $request->input('currency');
