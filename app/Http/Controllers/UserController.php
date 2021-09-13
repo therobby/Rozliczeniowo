@@ -54,25 +54,42 @@ class UserController extends Controller
     // get user with id
     public function show($id){
         if(auth()->check()){
-            $user_id = auth()->id();
 
             $user = User::find(['id' => $id])->first();
             
-            $user->password = null;
+            if($user){
+                $user->password = null;
+                return response()->json($user);
+            } else {
+                return response()->json(null);
+            }
+        }
+        return response(401);
+    }
 
-            return response()->json($user);
+    // get user with username
+    public function find($username){
+        if(auth()->check()){
+
+            $user = User::where('username', 'like' , '%'.$username.'%')->first();
+            if($user){
+                $user->password = null;
+                return response()->json($user);
+            } else {
+                return response()->json(null);
+            }
         }
         return response(401);
     }
     
     // update user data
-    public function update(Request $request, $id){
+    public function update(Request $request){
 
         
         if(auth()->check()){
             $user_id = auth()->id();
             
-            $user = User::find(['id' => $id])->first();
+            $user = User::find(['id' => $user_id])->first();
 
 
             if($request->has('username')){
@@ -99,11 +116,11 @@ class UserController extends Controller
     }
 
     // delete user
-    public function destroy($id){
+    public function destroy(){
         if(auth()->check()){
             $user_id = auth()->id();
 
-            $user = User::find(['id' => $id])->first();
+            $user = User::find(['id' => $user_id])->first();
             $user->delete();
 
             return response(200);

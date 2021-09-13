@@ -18,6 +18,7 @@ class CreateBillsGroupsTable extends Migration
             $table->bigInteger('owner_id');
             $table->text('title');
             $table->text('description');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

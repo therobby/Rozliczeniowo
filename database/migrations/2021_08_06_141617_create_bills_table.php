@@ -15,12 +15,11 @@ class CreateBillsTable extends Migration
     {
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('group_id');
             $table->bigInteger('owner_id');
             $table->text('title');
             $table->text('description');
-            $table->boolean('fixed_price');
-            $table->string('currency', 6)->default('PLN');
-            $table->boolean('archived')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BillsGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class BillsGroupController extends Controller
 {
@@ -23,10 +25,14 @@ class BillsGroupController extends Controller
         if(auth()->check()){
             $user_id = auth()->id();
 
-            $request->validate([
+            $validation = Validator::make($request->all(), [
                 'title' =>'required',
                 'description' =>'required',
             ]);
+
+            if($validation->fails()){
+                return response('Missing required user data', 400);
+            }
 
             $group = new BillsGroup;
             $group->title = $request->input('title');
@@ -59,11 +65,15 @@ class BillsGroupController extends Controller
         if(auth()->check()){
             $user_id = auth()->id();
 
-            $request->validate([
+            $validation = Validator::make($request->all(), [
                 'title' =>'required',
                 'description' =>'required',
-                'users' =>'required',
+                'users' => 'required'
             ]);
+
+            if($validation->fails()){
+                return response('Missing required user data', 400);
+            }
             
             $group = BillsGroup::find(['owner_id'=>$user_id, 'id' => $id])->first();
 

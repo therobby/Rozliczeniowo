@@ -15,9 +15,15 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('bill_id');
             $table->text('name');
+
+            $table->float('original_price');
+            $table->string('original_currency', 6)->default('PLN'); // TODO: implement this: http://api.nbp.pl/
+
             $table->float('price');
             $table->string('currency', 6)->default('PLN'); // TODO: implement this: http://api.nbp.pl/
+            
             $table->timestamps();
         });
     }
