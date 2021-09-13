@@ -13,5 +13,9 @@ class Bill extends Model
     public function products(){
         return $this->hasMany(Product::class);
     }
+
+    public function group(){
+        return $this->belongsTo(BillsGroup::class, 'group_id', 'id')->first();
+    }
 }
  

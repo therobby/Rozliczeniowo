@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bill;
 use App\Models\BillsGroup;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -25,6 +26,11 @@ class BillController extends Controller
     public function store(Request $request, $group_id){
         if(auth()->check()){
             $user_id = auth()->id();
+
+            $billsgroup = BillsGroup::find($group_id);
+            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+                return response(401);
+            }
 
             $validation = Validator::make($request->all(), [
                 'title' =>'required',
@@ -64,8 +70,11 @@ class BillController extends Controller
     public function groupBills($id){
         if(auth()->check()){
             $billsgroup = BillsGroup::find($id);
-            // dd($billsgroup->bills());
-            if($billsgroup && $billsgroup->hasUser(auth()->id())){
+            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+                return response(401);
+            }
+            
+            if($billsgroup){
                 $bills = $billsgroup->bills();
             
                 return response()->json($bills);
@@ -77,29 +86,22 @@ class BillController extends Controller
 
     // update bill data
     public function update(Request $request, $id){
-
-        
         if(auth()->check()){
             $user_id = auth()->id();
+            
+            $bill = Bill::find(['id' => $id])->first();
 
-            $validation = Validator::make($request->all(), [
-                'title' =>'required',
-                'description' =>'required',
-                'fixed_price' =>'required',
-                'currency' =>'required',
-            ]);
-
-            if($validation->fails()){
-                return response('Missing required user data', 400);
+            if(!$bill->group()->hasUser($user_id)){
+                return response(401);
             }
-            
-            $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
 
-            $bill->title = $request->input('title');
-            $bill->description = $request->input('description');
-            $bill->fixed_price = $request->input('fixed_price');
-            $bill->currency = $request->input('currency');
+            if($request->has('title'))
+                $bill->title = $request->input('title');
+            if($request->has('description'))
+                $bill->description = $request->input('description');
             
+
+                \var_dump($bill);
             $bill->save();
 
             return response(200);
@@ -112,10 +114,57 @@ class BillController extends Controller
         if(auth()->check()){
             $user_id = auth()->id();
 
+            $billsgroup = BillsGroup::find($id);
+            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+                return response(401);
+            }
+
             $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
             $bill->delete();
 
             return response(200);
+        }
+        return response(401);
+    }
+
+    public function billProducts($id){
+        if(auth()->check()){
+            $user_id = auth()->id();
+
+            $billsgroup = BillsGroup::find($id);
+            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+                return response(401);
+            }
+
+            $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
+
+            return response()->json($bill->products());
+        }
+        return response(401);
+    }
+
+    public function createBillProduct(Request $request, $id){
+        if(auth()->check()){
+
+            $validation = Validator::make($request->all(), [
+                'name' =>'required',
+                'original_price' =>'required',
+                'original_currency' =>'required'
+            ]);
+
+            if($validation->fails()){
+                return response('Missing required user data', 400);
+            }
+
+            $product = new Product();
+            $product->name = $request->input('name');
+            $product->original_price = $request->input('original_price');
+            $product->bill_id = $id;
+            $product->original_currency = $request->input('original_currency');
+            
+            $product->save();
+
+            return response(201);
         }
         return response(401);
     }

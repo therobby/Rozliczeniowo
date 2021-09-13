@@ -56,6 +56,10 @@ Route::prefix('/bill')->group(function(){
         Route::patch('/{id}', [BillController::class, 'update']); // will update bill with provided data
         Route::delete('/{id}', [BillController::class, 'destroy']); // will delete bill
         // Route::get('/group/{id}', [BillController::class, 'groupBills']); // will return selected group bills
+        Route::get('/{id}/products', [BillController::class, 'billProducts']);
+        Route::post('/{bill_id}/product', [BillController::class, 'createBillProduct']);
+        Route::patch('/{bill_id}/product/{product_id}', [BillController::class, 'updateBillProduct']);
+        Route::delete('/{bill_id}/product/{product_id}', [BillController::class, 'deleteBillProducts']);
     });
 });
 
