@@ -2,10 +2,45 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
+    public function login(Request $request){
+        $username = $request->input('username');
+
+        $user = User::where(['username'=>$username])->first();
+
+        if($user){
+            if($request->has(['password'])){
+                if(Hash::check($request->input('password'), $user->password)){
+                    return $user->createToken($request->userAgent())->plainTextToken;
+                } else {
+                    return response("Invalid password",400);
+                }
+            } else {
+                return response("No password provided",400);
+            }
+        }
+        return response("User doesn't exists", 400);
+
+    }
+
+    public function register(Request $request){
+        if($request->has(['username', 'email', 'password'])){
+            $user = new User();
+            $user->username = $request->input('username');
+            $user->email = $request->input('email');
+            $user->password = Hash::make($request->input('password'));
+            $user->save();
+            return response(200);
+        }
+        return response("Missing required user data", 400);
+    }
+
     // get logged in user data
     public function index() {
         if(auth()->check()){
@@ -40,7 +75,7 @@ class UserController extends Controller
             $user = User::find(['id' => $id])->first();
 
 
-            if($request->has('name')){
+            if($request->has('username')){
                 $user->name = $request->input('name');
             }
             if($request->has('email')){
