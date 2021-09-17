@@ -5,40 +5,51 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-
     public function login(Request $request){
+        $req = Validator::make($request->all(),[
+            'username'=>'required|exists:users|alpha_dash',
+            'password'=>'required|min:8'
+        ]);
+
         $username = $request->input('username');
 
         $user = User::where(['username'=>$username])->first();
 
-        if($user){
-            if($request->has(['password'])){
-                if(Hash::check($request->input('password'), $user->password)){
-                    return $user->createToken($request->userAgent())->plainTextToken;
-                } else {
-                    return response("Invalid password",400);
-                }
+        if(!$req->fails()){
+            if(Hash::check($request->input('password'), $user->password)){
+                return $user->createToken($request->userAgent())->plainTextToken;
             } else {
-                return response("No password provided",400);
+                return response(['password'=>'Invalid password'],401);
             }
         }
-        return response("User doesn't exists", 400);
-
+        return response($req->errors(), 401);
     }
 
     public function register(Request $request){
-        if($request->has(['username', 'email', 'password'])){
-            $user = new User();
-            $user->username = $request->input('username');
-            $user->email = $request->input('email');
-            $user->password = Hash::make($request->input('password'));
-            $user->save();
-            return response(200);
+
+        $req = Validator::make($request->all(),[
+            'username'=>'required|unique:users|alpha_dash',
+            'email'=>'required|unique:users|email',
+            'password'=>'required|min:8'
+        ]);
+
+        if(!$req->fails()){
+            // if(!User::where(['username'=>$request->username])->get()){
+                $data = $req->validate();
+                $user = new User();
+                $user->username = $data['username'];
+                $user->email = $data['email'];
+                $user->password = Hash::make($data['password']);
+                $user->save();
+                return response(200);
+            // }
+            // return response(403);
         }
-        return response("Missing required user data", 400);
+        return response($req->errors(), 409);
     }
 
     // get logged in user data
@@ -55,7 +66,7 @@ class UserController extends Controller
     public function show($id){
         if(auth()->check()){
 
-            $user = User::find(['id' => $id])->first();
+            $user = User::find($id)->first();
             
             if($user){
                 $user->password = null;

@@ -15,7 +15,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('bill_id');
+            $table->foreignId('bill_id')->references('id')->on('bills');
             $table->text('name');
 
             $table->float('original_price');

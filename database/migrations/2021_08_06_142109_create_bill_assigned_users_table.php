@@ -14,8 +14,9 @@ class CreateBillAssignedUsersTable extends Migration
     public function up()
     {
         Schema::create('bill_assigned_users', function (Blueprint $table) {
-            $table->bigInteger('user_id');
-            $table->bigInteger('bill_id');
+            $table->id();
+            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('bill_id')->references('id')->on('bills');
             $table->timestamps();
         });
     }

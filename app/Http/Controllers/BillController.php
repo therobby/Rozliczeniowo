@@ -11,162 +11,124 @@ use Illuminate\Support\Facades\Validator;
 class BillController extends Controller
 {
     // get user bills from all groups
-    public function index() {
-        if(auth()->check()){
-            $user_id = auth()->id();
+    public function index()
+    {
+        $user_id = auth()->id();
 
-            $bills = Bill::find(['owner_id'=>$user_id]);
-            
-            return response()->json($bills);
-        }
-        return response(401);
+        $bills = Bill::find(['owner_id' => $user_id]);
+
+        return response()->json($bills);
     }
 
     // save new bill
-    public function store(Request $request, $group_id){
-        if(auth()->check()){
-            $user_id = auth()->id();
+    public function store(Request $request, BillsGroup $billgroup)
+    {
+        $user_id = auth()->id();
 
-            $billsgroup = BillsGroup::find($group_id);
-            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
-                return response(401);
-            }
-
-            $validation = Validator::make($request->all(), [
-                'title' =>'required',
-                'description' =>'required'
-            ]);
-
-            if($validation->fails()){
-                return response('Missing required user data', 400);
-            }
-
-            $bill = new Bill;
-            $bill->title = $request->input('title');
-            $bill->owner_id = $user_id;
-            $bill->group_id = $group_id;
-            $bill->description = $request->input('description');
-            
-            $bill->save();
-
-            return response(201);
+        if ($this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)) {
+            return response(401);
         }
-        return response(401);
+        // $billsgroup = BillsGroup::find($group_id);
+        // if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+        //     return response(401);
+        // }
+
+        $validation = Validator::make($request->all(), [
+            'title' => 'required',
+            'description' => 'required'
+        ]);
+
+        if ($validation->fails()) {
+            return response('Missing required user data', 400);
+        }
+
+        $bill = new Bill;
+        $bill->title = $request->input('title');
+        $bill->owner_id = $user_id;
+        $bill->group_id = $billgroup->id;
+        $bill->description = $request->input('description');
+
+        $bill->save();
+
+        return response(201);
     }
 
     // get bill with id
-    public function show($id){
-        if(auth()->check()){
-            $user_id = auth()->id();
-
-            $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
-            
-            return response()->json($bill);
+    public function show(Bill $bill)
+    {
+        if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
+            return response(401);
         }
-        return response(401);
+
+        $bill->sum = 0;
+        $bill->products = $bill->products();
+
+        foreach($bill->products as $product){
+            $bill->sum += $product->price;
+        }
+
+        return response()->json($bill);
     }
 
     // get all bills for group
-    public function groupBills($id){
-        if(auth()->check()){
-            $billsgroup = BillsGroup::find($id);
-            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
-                return response(401);
-            }
-            
-            if($billsgroup){
-                $bills = $billsgroup->bills();
-            
-                return response()->json($bills);
-            } 
-            return response()->json(null);
+    public function groupBills(BillsGroup $billgroup)
+    {
+        if ($this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)) {
+            return response(401);
         }
-        return response(401);
+
+        // $billsgroup = BillsGroup::find($id);
+        // if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+        //     return response(401);
+        // }
+
+        if ($billgroup) {
+            $bills = $billgroup->bills();
+
+            return response()->json($bills);
+        }
+        return response()->json(null);
     }
 
     // update bill data
-    public function update(Request $request, $id){
-        if(auth()->check()){
-            $user_id = auth()->id();
-            
-            $bill = Bill::find(['id' => $id])->first();
+    public function update(Bill $bill, Request $request)
+    {
+        $user_id = auth()->id();
 
-            if(!$bill->group()->hasUser($user_id)){
-                return response(401);
-            }
-
-            if($request->has('title'))
-                $bill->title = $request->input('title');
-            if($request->has('description'))
-                $bill->description = $request->input('description');
-            
-
-                \var_dump($bill);
-            $bill->save();
-
-            return response(200);
+        if ($this->checkIfUserInBillGroupBID($user_id, $bill->id)) {
+            return response(401);
         }
-        return response(401);
+
+        // $bill = Bill::find(['id' => $id])->first();
+        // if(!$bill->group()->hasUser($user_id)){
+        //     return response(401);
+        // }
+
+        if ($request->has('title'))
+            $bill->title = $request->input('title');
+        if ($request->has('description'))
+            $bill->description = $request->input('description');
+
+        $bill->save();
+
+        return response(200);
     }
 
     // delete bill
-    public function destroy($id){
-        if(auth()->check()){
-            $user_id = auth()->id();
-
-            $billsgroup = BillsGroup::find($id);
-            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
-                return response(401);
-            }
-
-            $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
-            $bill->delete();
-
-            return response(200);
+    public function destroy(Bill $bill)
+    {
+        if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
+            return response(401);
         }
-        return response(401);
-    }
 
-    public function billProducts($id){
-        if(auth()->check()){
-            $user_id = auth()->id();
+        // $billsgroup = BillsGroup::find($id);
+        // if($billsgroup && !$billsgroup->hasUser(auth()->id())){
+        //     return response(401);
+        // }
 
-            $billsgroup = BillsGroup::find($id);
-            if($billsgroup && !$billsgroup->hasUser(auth()->id())){
-                return response(401);
-            }
+        // $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
+        $bill->delete();
 
-            $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
-
-            return response()->json($bill->products());
-        }
-        return response(401);
-    }
-
-    public function createBillProduct(Request $request, $id){
-        if(auth()->check()){
-
-            $validation = Validator::make($request->all(), [
-                'name' =>'required',
-                'original_price' =>'required',
-                'original_currency' =>'required'
-            ]);
-
-            if($validation->fails()){
-                return response('Missing required user data', 400);
-            }
-
-            $product = new Product();
-            $product->name = $request->input('name');
-            $product->original_price = $request->input('original_price');
-            $product->bill_id = $id;
-            $product->original_currency = $request->input('original_currency');
-            
-            $product->save();
-
-            return response(201);
-        }
-        return response(401);
+        return response(200);
     }
 }
- 

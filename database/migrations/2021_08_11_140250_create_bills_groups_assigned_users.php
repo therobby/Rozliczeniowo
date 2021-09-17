@@ -14,8 +14,10 @@ class CreateBillsGroupsAssignedUsers extends Migration
     public function up()
     {
         Schema::create('bills_groups_assigned_users', function (Blueprint $table) {
-            $table->bigInteger('group_id');
-            $table->bigInteger('user_id');
+            $table->id();
+            $table->foreignId('group_id')->references('id')->on('bills_groups');
+            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('role_id')->references('id')->on('user_bill_roles');
             $table->timestamps();
         });
     }

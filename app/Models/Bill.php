@@ -11,7 +11,7 @@ class Bill extends Model
     use HasFactory, SoftDeletes;
 
     public function products(){
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Product::class, 'bill_id', 'id')->get();
     }
 
     public function group(){

@@ -15,8 +15,8 @@ class CreateBillsTable extends Migration
     {
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('group_id');
-            $table->bigInteger('owner_id');
+            $table->foreignId('group_id')->references('id')->on('bills_groups');
+            $table->foreignId('owner_id')->references('id')->on('users');
             $table->text('title');
             $table->text('description');
             $table->softDeletes();
