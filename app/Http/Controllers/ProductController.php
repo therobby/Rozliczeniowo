@@ -12,18 +12,9 @@ class ProductController extends Controller
     // get product assigned to bill
     public function billProducts(Bill $bill)
     {
-        // $user_id = auth()->id();
-
         if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
-            return response(401);
+            return response('',401);
         }
-
-        // $billsgroup = BillsGroup::find($id);
-        // if($billsgroup && !$billsgroup->hasUser(auth()->id())){
-        //     return response(401);
-        // }
-
-        // $bill = Bill::find(['owner_id'=>$user_id, 'id' => $id])->first();
 
         return response()->json($bill->products());
     }
@@ -32,7 +23,7 @@ class ProductController extends Controller
     public function createBillProduct(Bill $bill, Request $request)
     {
         if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
-            return response(401);
+            return response('',401);
         }
 
         $validation = Validator::make($request->all(), [
@@ -54,14 +45,14 @@ class ProductController extends Controller
 
         $product->save();
 
-        return response(201);
+        return response('',201);
     }
 
     // remove product from bill
     public function removeBillProduct(Bill $bill, Product $product)
     {
         if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
-            return response(401);
+            return response('',401);
         }
 
         $product->delete();

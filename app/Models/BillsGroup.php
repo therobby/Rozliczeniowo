@@ -17,14 +17,12 @@ class BillsGroup extends Model
     public function users() {
 
         $billUsers = BillGroupAssignedUser::where(['group_id'=>$this->id])->get();
-        $users = $this->belongsToMany(User::class, 'bills_groups_assigned_users','user_id', 'group_id')->get();
-        $roles = $this->belongsToMany(Role::class, 'bills_groups_assigned_users','role_id', 'group_id')->get();
         
-        \dd($billUsers, $users, $roles);
-        // foreach($users as $user){
-        //     $user->role_id = $billUsers;
-        // }
-        return $this->belongsToMany(User::class, 'bills_groups_assigned_users','user_id', 'group_id')->get();
+        foreach($billUsers as $user){
+            $user->role = $user->role();
+        }
+
+        return $billUsers;
     }
 
     public function hasUser($user_id){
@@ -44,11 +42,15 @@ class BillsGroup extends Model
         $groupUser->delete();
     }
 
-    public function userRole($user_id, $role_id){
+    public function setUserRole($user_id, $role_id){
         $groupUser = BillGroupAssignedUser::where(['user_id'=>$user_id, 'group_id'=>$this->id])->first();
-        \var_dump($groupUser);
         $groupUser->role_id = $role_id;
         $groupUser->save();
+    }
+
+    public function getUserRole($user_id){
+        $groupUser = BillGroupAssignedUser::where(['user_id'=>$user_id, 'group_id'=>$this->id])->first();
+        return $groupUser->role();
     }
 
     

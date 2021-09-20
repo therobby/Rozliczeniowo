@@ -50,14 +50,14 @@ class BillController extends Controller
 
         $bill->save();
 
-        return response(201);
+        return response('',201);
     }
 
     // get bill with id
     public function show(Bill $bill)
     {
-        if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
-            return response(401);
+        if (!$this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
+            return response('',401);
         }
 
         $bill->sum = 0;
@@ -73,8 +73,8 @@ class BillController extends Controller
     // get all bills for group
     public function groupBills(BillsGroup $billgroup)
     {
-        if ($this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)) {
-            return response(401);
+        if (!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)) {
+            return response('',401);
         }
 
         // $billsgroup = BillsGroup::find($id);
@@ -95,8 +95,8 @@ class BillController extends Controller
     {
         $user_id = auth()->id();
 
-        if ($this->checkIfUserInBillGroupBID($user_id, $bill->id)) {
-            return response(401);
+        if (!$this->checkIfUserInBillGroupBID($user_id, $bill->id)) {
+            return response('',401);
         }
 
         // $bill = Bill::find(['id' => $id])->first();
@@ -117,8 +117,8 @@ class BillController extends Controller
     // delete bill
     public function destroy(Bill $bill)
     {
-        if ($this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
-            return response(401);
+        if (!$this->checkIfUserInBillGroupBID(auth()->id(), $bill->id)) {
+            return response('',401);
         }
 
         // $billsgroup = BillsGroup::find($id);

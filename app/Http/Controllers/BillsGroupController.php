@@ -42,7 +42,7 @@ class BillsGroupController extends Controller
 
             $group->addUser($user_id);
             $role_id = Role::where(['slug'=>'owner'])->first()->id;
-            $group->userRole($user_id, $role_id);
+            $group->setUserRole($user_id, $role_id);
 
             return response(201);
     }
@@ -51,7 +51,7 @@ class BillsGroupController extends Controller
     public function show(BillsGroup $billgroup){
 
             if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-                return response(401);
+                return response('',401);
             }
             
             return response()->json($billgroup);
@@ -60,7 +60,7 @@ class BillsGroupController extends Controller
     // update bills group data
     public function update(Request $request, BillsGroup $billgroup){
             if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-                return response(401);
+                return response('',401);
             }
 
             $validation = Validator::make($request->all(), [
@@ -86,7 +86,7 @@ class BillsGroupController extends Controller
             $user_id = auth()->id();
 
         if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-            return response(401);
+            return response('',401);
         }
 
         if($billgroup->owner_id === auth()->id()){
@@ -100,7 +100,7 @@ class BillsGroupController extends Controller
     // show users in group
     public function getUsers(BillsGroup $billgroup){
         if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-            return response(401);
+            return response('',401);
         }
 
         return response()->json($billgroup->users());
@@ -109,7 +109,7 @@ class BillsGroupController extends Controller
     // add user to group
     public function addUser(BillsGroup $billgroup, User $user){
         if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-            return response(401);
+            return response('',401);
         }
 
         $billgroup->addUser($user->id);
@@ -119,7 +119,7 @@ class BillsGroupController extends Controller
     // remove user from group
     public function removeUser(BillsGroup $billgroup, User $user){
         if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-            return response(401);
+            return response('',401);
         }
 
         $billgroup->removeUser($user->id);
@@ -130,18 +130,21 @@ class BillsGroupController extends Controller
     public function updateUserRole(BillsGroup $billgroup, User $user, Request $request){
 
         if(!$this->checkIfUserInBillGroupGID(auth()->id(), $billgroup->id)){
-            return response(401);
+            return response('',401);
         }
 
         if($request->has('role')){
             $role = Role::where('slug', $request->input('role'))->first();
+            if($billgroup->getUserRole($user->id)->slug === 'owner'){
+                return response('Owner can\'t change his role.',401);
+            }
 
             if($role){
-                $billgroup->userRole($user->id, $role->id);
+                $billgroup->setUserRole($user->id, $role->id);
                 return response(200);
             }
-            return response(409);
+            return response('',409);
         }
-        return response(409);
+        return response('',409);
     }
 }

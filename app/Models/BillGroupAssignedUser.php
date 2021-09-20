@@ -12,11 +12,11 @@ class BillGroupAssignedUser extends Model
     protected $table = 'bills_groups_assigned_users';
 
     public function user(){
-        return $this->hasOne(User::class);
+        return $this->hasOne(User::class, 'id', 'user_id')->first();
     }
 
     public function role(){
-        return $this->hasOne(Role::class);
+        return $this->hasOne(Role::class, 'id', 'role_id')->first();
     }
 }
  
