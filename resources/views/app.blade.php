@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Rozliczeniowo') }}</title>
     
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -21,8 +21,9 @@
 </head>
 <body>
     <div id="app">
-        <example-component />
-           
+        <v-app>
+            <router-view></router-view>
+        </v-app>
     </div>
 </body>
 </html>

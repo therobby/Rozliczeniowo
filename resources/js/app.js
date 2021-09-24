@@ -4,12 +4,38 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-require('./bootstrap');
-import Vue from 'vue';
-import Vuetify from 'vuetify';
+require('./bootstrap')
+import Vue from 'vue'
+import vuetify from './plugins/vuetify.js'
+// import Vuetify from 'vuetify'
+import VueRouter from 'vue-router'
+import Vuex from "vuex"
 
-window.Vue = require('vue').default;
-Vue.use(Vuetify);
+import LoginComponent from './components/LoginComponent.vue'
+import RegisterComponent from './components/RegisterComponent.vue'
+import AppContainerComponent from './components/AppContainerComponent.vue'
+
+window.Vue = require('vue').default
+
+// Vue.use(Vuetify)
+Vue.use(VueRouter)
+
+Vue.use(Vuex)
+
+
+const store = new Vuex.Store({
+    state: {
+        userToken: ""
+    },
+    mutations: {
+        setToken(token){
+            state.userToken = token;
+        }
+    },
+    actions: {}
+
+})
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -18,18 +44,28 @@ Vue.use(Vuetify);
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+const files = require.context('./', true, /\.vue$/i)
+files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+// Vue.component('login-component', LoginComponent);
+// Vue.component('register-component', RegisterComponent);
+// Vue.component('app-component', AppContainerComponent);
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
+
+const routes = [
+    {path: '/login', component: LoginComponent, name: "Login"},
+    {path: '/register', component: RegisterComponent, name: "Register"},
+    {path: '/', component: AppContainerComponent, name: "MainApp"}
+];
+
+const router = new VueRouter({
+    routes
+});
 
 const app = new Vue({
     el: '#app',
-    vuetify: new Vuetify(),
+    vuetify,
+    router,
+    store,
 });
+
